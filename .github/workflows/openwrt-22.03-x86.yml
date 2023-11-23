@@ -8,7 +8,7 @@
 # Description: Build OpenWrt using GitHub Actions
 #
 
-name: X86_openwrt-23.05
+name: V23.05.2
 
 on:
  # repository_dispatch:
