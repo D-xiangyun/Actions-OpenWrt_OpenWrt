@@ -11,11 +11,6 @@
 name: V23.05.2
 
 on:
-  push:
-    paths:
-      - 'config/x86/openwrt-22.03/.config'
-      - 'config/x86/openwrt-22.03/config.sh
-      - 'config/x86/openwrt-22.03/fullcone.sh'
  # repository_dispatch:
   workflow_dispatch:
   schedule:
