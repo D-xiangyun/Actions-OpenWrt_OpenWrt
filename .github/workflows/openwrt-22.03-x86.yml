@@ -37,7 +37,6 @@ env:
   TZ: Asia/Shanghai
   ADD_FULLCONE: true
   FULLCONE_SH: config/x86/openwrt-22.03/fullcone.sh
-  CONFIG_SH: config/x86/openwrt-22.03/config.sh
   FULLCONE_PATCH_PATH: config/x86/openwrt-22.03/luci-app-firewall-fullcone.patch
 
 jobs:
