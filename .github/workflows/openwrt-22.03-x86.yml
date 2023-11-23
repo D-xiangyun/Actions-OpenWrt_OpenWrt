@@ -35,7 +35,7 @@ env:
   UPLOAD_WETRANSFER: false
   UPLOAD_RELEASE: true
   TZ: Asia/Shanghai
-  CONFIG_FILE: config/x86/openwrt-22.03/config.sh
+  CONFIG_SH: config/x86/openwrt-22.03/config.sh
   FULLCONE_SH: config/x86/openwrt-22.03/fullcone.sh
   FULLCONE_PATCH_PATH: config/x86/openwrt-22.03/luci-app-firewall-fullcone.patch
 
