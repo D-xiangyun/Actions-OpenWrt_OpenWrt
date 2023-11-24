@@ -34,6 +34,9 @@ env:
   UPLOAD_WETRANSFER: false
   UPLOAD_RELEASE: true
   TZ: Asia/Shanghai
+  ADD_FULLCONE: true
+  FULLCONE_SH: config/x86/x-wrt/fullcone.sh
+  FULLCONE_PATCH_PATH: config/x86/x-wrt/luci-app-firewall-fullcone.patch
 
 jobs:
   build:
@@ -191,6 +194,15 @@ jobs:
        echo "v2dat" >> .git/info/sparse-checkout
        git pull --depth 1 origin v5
        git branch --set-upstream-to=origin/v5 master
+       
+    - name: Append Fullcone Nat depend
+      if: env.ADD_FULLCONE == 'true'
+      run: |
+       chmod +x $FULLCONE_SH
+       cd openwrt
+       $GITHUB_WORKSPACE/$FULLCONE_SH
+       cd feeds/luci
+       git diff applications/luci-app-firewall/htdocs/luci-static/resources/view/firewall/zones.js
 
     - name: Install feeds
       run: cd openwrt && ./scripts/feeds install -a
