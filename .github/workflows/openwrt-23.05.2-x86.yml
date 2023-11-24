@@ -215,7 +215,7 @@ jobs:
    #   run: |
    #     cd openwrt
     #    sudo rm -rf feeds/packages/lang/golang
-     #   svn co https://github.com/openwrt/packages/branches/openwrt-23.05/lang/golang feeds/packages/lang/golang
+     #   svn co https://github.com/openwrt/packages/branches/openwrt-23.05.2/lang/golang feeds/packages/lang/golang
      #   git apply $GITHUB_WORKSPACE/patches/golang1.21.2.patch
       #  git apply $GITHUB_WORKSPACE/patches/Revertgolang1.patch
       #  git apply $GITHUB_WORKSPACE/patches/Revertgolang2.patch
