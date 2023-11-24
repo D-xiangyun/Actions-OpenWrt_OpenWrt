@@ -26,7 +26,7 @@ env:
   REPO_URL: https://github.com/openwrt/openwrt.git
   REPO_BRANCH: v23.05.2
   FEEDS_CONF: feeds.conf.default
-  CONFIG_FILE: config/x86/openwrt-22.03/.config
+  CONFIG_FILE: config/x86/openwrt-23.05.2/.config
   DIY_P1_SH: diy-part1.sh
   DIY_P2_SH: diy-part4.sh
   UPLOAD_BIN_DIR: false
@@ -36,8 +36,8 @@ env:
   UPLOAD_RELEASE: true
   TZ: Asia/Shanghai
   ADD_FULLCONE: true
-  FULLCONE_SH: config/x86/openwrt-22.03/fullcone.sh
-  FULLCONE_PATCH_PATH: config/x86/openwrt-22.03/luci-app-firewall-fullcone.patch
+  FULLCONE_SH: config/x86/openwrt-23.05.2/fullcone.sh
+  FULLCONE_PATCH_PATH: config/x86/openwrt-23.05.2/luci-app-firewall-fullcone.patch
 
 jobs:
   build:
@@ -254,7 +254,7 @@ jobs:
         echo "status=success" >> $GITHUB_OUTPUT
         grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
         [ -s DEVICE_NAME ] && echo "DEVICE_NAME=_$(cat DEVICE_NAME)" >> $GITHUB_ENV
-        echo "FILE_DATE=_$(date +"openwrt-23.05"-"%Y%m%d%H%M")" >> $GITHUB_ENV
+        echo "FILE_DATE=_$(date +"openwrt-23.05.2"-"%Y%m%d%H%M")" >> $GITHUB_ENV
 
     - name: Check space usage
       if: (!cancelled())
