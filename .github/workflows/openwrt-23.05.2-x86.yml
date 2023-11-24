@@ -1,0 +1,338 @@
+#
+# Copyright (c) 2019-2020 P3TERX <https://p3terx.com>
+#
+# This is free software, licensed under the MIT License.
+# See /LICENSE for more information.
+#
+# https://github.com/P3TERX/Actions-OpenWrt
+# Description: Build OpenWrt using GitHub Actions
+#
+
+name: V23.05.2
+
+on:
+ # repository_dispatch:
+  workflow_dispatch:
+  schedule:
+    - cron: 0 21 * * *
+  repository_dispatch:
+    inputs:
+      ssh:
+        description: 'SSH connection to Actions'
+        required: false
+        default: 'false'     
+
+env:
+  REPO_URL: https://github.com/openwrt/openwrt.git
+  REPO_BRANCH: v23.05.2
+  FEEDS_CONF: feeds.conf.default
+  CONFIG_FILE: config/x86/openwrt-22.03/.config
+  DIY_P1_SH: diy-part1.sh
+  DIY_P2_SH: diy-part4.sh
+  UPLOAD_BIN_DIR: false
+  UPLOAD_FIRMWARE: true
+  UPLOAD_COWTRANSFER: false
+  UPLOAD_WETRANSFER: false
+  UPLOAD_RELEASE: true
+  TZ: Asia/Shanghai
+  ADD_FULLCONE: true
+  FULLCONE_SH: config/x86/openwrt-22.03/fullcone.sh
+  FULLCONE_PATCH_PATH: config/x86/openwrt-22.03/luci-app-firewall-fullcone.patch
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@main
+
+    - name: Initialization environment
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
+        sudo -E apt-get -qq update
+        sudo -E apt-get -qq install $(cat $GITHUB_WORKSPACE/depends-ubuntu-2204.txt)
+        sudo -E apt-get -qq autoremove --purge
+        sudo -E apt-get -qq clean
+        sudo timedatectl set-timezone "$TZ"
+        sudo mkdir -p /workdir
+        sudo chown $USER:$GROUPS /workdir
+
+    - name: Clone source code
+      working-directory: /workdir
+      run: |
+        df -hT $PWD
+        git clone $REPO_URL -b $REPO_BRANCH openwrt
+        ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
+
+    - name: Load custom feeds
+      run: |
+        [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
+        chmod +x $DIY_P1_SH
+        cd openwrt
+        $GITHUB_WORKSPACE/$DIY_P1_SH
+
+    - name: Update feeds
+      run: cd openwrt && ./scripts/feeds update -a
+
+    - name: delete package
+      id: delete
+      run: |
+        cd openwrt
+        sudo rm -rf feeds/luci/applications/luci-app-smartdns
+        sudo rm -rf feeds/packages/net/smartdns
+        git clone -b master https://github.com/pymumu/openwrt-smartdns feeds/packages/net/smartdns
+        git clone -b master https://github.com/pymumu/luci-app-smartdns feeds/luci/applications/luci-app-smartdns
+        # sudo rm -rf package/feeds/luci/luci-app-smartdns
+        # sudo rm -rf package/feeds/packages/smartdns
+        git clone -b main https://github.com/fw876/helloworld package/passwall
+        sudo rm -rf package/passwall/mosdns
+        git clone -b main https://github.com/xiaorouji/openwrt-passwall.git package/passwall/p
+        mv package/passwall/p/luci-app-passwall package/passwall/luci-app-passwall
+        sudo rm -rf package/passwall/p/
+         
+    - name: Add brook
+      id: passwall_brook
+      run: |
+       cd openwrt
+       mkdir -p package/passwall/brook
+       cd package/passwall/brook
+       git init
+       git remote add origin https://github.com/xiaorouji/openwrt-passwall-packages.git
+       git config core.sparsecheckout true
+       echo "brook" >> .git/info/sparse-checkout
+       git pull --depth 1 origin main
+       git branch --set-upstream-to=origin/main master
+       
+    - name: Add pdnsd-alt
+      id: passwall_pdnsd-alt
+      run: |
+       cd openwrt
+       mkdir -p package/passwall/pdnsd-alt
+       cd package/passwall/pdnsd-alt
+       git init
+       git remote add origin https://github.com/xiaorouji/openwrt-passwall-packages.git
+       git config core.sparsecheckout true
+       echo "pdnsd-alt" >> .git/info/sparse-checkout
+       git pull --depth 1 origin main
+       git branch --set-upstream-to=origin/main master
+
+    - name: Add sing-box
+      id: passwall_sing-box
+      run: |
+       cd openwrt
+       mkdir -p package/passwall/sing-box
+       cd package/passwall/sing-box
+       git init
+       git remote add origin https://github.com/xiaorouji/openwrt-passwall-packages.git
+       git config core.sparsecheckout true
+       echo "sing-box" >> .git/info/sparse-checkout
+       git pull --depth 1 origin main
+       git branch --set-upstream-to=origin/main master
+       
+    - name: Add ssocks
+      id: passwall_ssocks
+      run: |
+       cd openwrt
+       mkdir -p package/passwall/ssocks
+       cd package/passwall/ssocks
+       git init
+       git remote add origin https://github.com/xiaorouji/openwrt-passwall-packages.git
+       git config core.sparsecheckout true
+       echo "ssocks" >> .git/info/sparse-checkout
+       git pull --depth 1 origin main
+       git branch --set-upstream-to=origin/main master
+       
+    - name: Add trojan-go
+      id: passwall_trojan-go
+      run: |
+       cd openwrt
+       mkdir -p package/passwall/trojan-go
+       cd package/passwall/trojan-go
+       git init
+       git remote add origin https://github.com/xiaorouji/openwrt-passwall-packages.git
+       git config core.sparsecheckout true
+       echo "trojan-go" >> .git/info/sparse-checkout
+       git pull --depth 1 origin main
+       git branch --set-upstream-to=origin/main master
+
+    - name: Add trojan-plus
+      id: passwall_trojan-plus
+      run: |
+       cd openwrt
+       mkdir -p package/passwall/trojan-plus
+       cd package/passwall/trojan-plus
+       git init
+       git remote add origin https://github.com/xiaorouji/openwrt-passwall-packages.git
+       git config core.sparsecheckout true
+       echo "trojan-plus" >> .git/info/sparse-checkout
+       git pull --depth 1 origin main
+       git branch --set-upstream-to=origin/main master
+    
+    - name: Add openclash
+      id: openclash
+      run: |
+       cd openwrt
+       mkdir -p package/passwall/openclash
+       cd package/passwall/openclash
+       git init
+       git remote add origin https://github.com/vernesong/OpenClash.git
+       git config core.sparsecheckout true
+       echo "luci-app-openclash" >> .git/info/sparse-checkout
+       git pull --depth 1 origin master
+       git branch --set-upstream-to=origin/master master
+
+    - name: Add mosdns
+      id: mosdns
+      run: |
+       cd openwrt
+       mkdir -p package/passwall/mosdns
+       cd package/passwall/mosdns
+       git init
+       git remote add origin https://github.com/sbwml/luci-app-mosdns.git
+       git config core.sparsecheckout true
+       echo "luci-app-mosdns" >> .git/info/sparse-checkout
+       echo "mosdns" >> .git/info/sparse-checkout
+       echo "v2dat" >> .git/info/sparse-checkout
+       git pull --depth 1 origin v5
+       git branch --set-upstream-to=origin/v5 master
+       
+    - name: Append Fullcone Nat depend
+      if: env.ADD_FULLCONE == 'true'
+      run: |
+       chmod +x $FULLCONE_SH
+       cd openwrt
+       $GITHUB_WORKSPACE/$FULLCONE_SH
+       cd feeds/luci
+       git diff applications/luci-app-firewall/htdocs/luci-static/resources/view/firewall/zones.js
+ 
+    - name: Install feeds
+      run: cd openwrt && ./scripts/feeds install -a
+
+ #   - name: update golang
+   #   run: |
+   #     cd openwrt
+    #    sudo rm -rf feeds/packages/lang/golang
+     #   svn co https://github.com/openwrt/packages/branches/openwrt-23.05/lang/golang feeds/packages/lang/golang
+     #   git apply $GITHUB_WORKSPACE/patches/golang1.21.2.patch
+      #  git apply $GITHUB_WORKSPACE/patches/Revertgolang1.patch
+      #  git apply $GITHUB_WORKSPACE/patches/Revertgolang2.patch
+    #  run: cd openwrt && git apply $GITHUB_WORKSPACE/patches/golang1.21.4.patch
+
+    - name: Load custom configuration
+      run: |
+        [ -e files ] && mv files openwrt/files
+        [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
+        chmod +x $DIY_P2_SH
+        cd openwrt
+        $GITHUB_WORKSPACE/$DIY_P2_SH
+
+    - name: SSH connection to Actions
+      uses: P3TERX/ssh2actions@v1.0.0
+      if: (github.event.inputs.ssh == 'true' && github.event.inputs.ssh  != 'false') || contains(github.event.action, 'ssh')
+      env:
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+
+    - name: Download package
+      id: package
+      run: |
+        cd openwrt
+        make defconfig
+        make download -j8
+        find dl -size -1024c -exec ls -l {} \;
+        find dl -size -1024c -exec rm -f {} \;
+
+    - name: Compile the firmware
+      id: compile
+      run: |
+        cd openwrt
+        echo -e "$(nproc) thread compile"
+        make -j$(nproc) || make -j1 || make -j1 V=s
+        echo "status=success" >> $GITHUB_OUTPUT
+        grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
+        [ -s DEVICE_NAME ] && echo "DEVICE_NAME=_$(cat DEVICE_NAME)" >> $GITHUB_ENV
+        echo "FILE_DATE=_$(date +"openwrt-23.05"-"%Y%m%d%H%M")" >> $GITHUB_ENV
+
+    - name: Check space usage
+      if: (!cancelled())
+      run: df -hT
+
+    - name: Upload bin directory
+      uses: actions/upload-artifact@main
+      if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
+      with:
+        name: OpenWrt_bin${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
+        path: openwrt/bin
+
+    - name: Organize files
+      id: organize
+      if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
+      run: |
+        cd openwrt/bin/targets/*/*
+        rm -rf packages
+        echo "FIRMWARE=$PWD" >> $GITHUB_ENV
+        echo "status=success" >> $GITHUB_OUTPUT
+
+    - name: Upload firmware directory
+      uses: actions/upload-artifact@main
+      if: steps.organize.outputs.status == 'success' && !cancelled()
+      with:
+        name: OpenWrt_firmware${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
+        path: ${{ env.FIRMWARE }}
+
+    - name: Upload firmware to cowtransfer
+      id: cowtransfer
+      if: steps.organize.outputs.status == 'success' && env.UPLOAD_COWTRANSFER == 'true' && !cancelled()
+      run: |
+        curl -fsSL git.io/file-transfer | sh
+        ./transfer cow --block 2621440 -s -p 64 --no-progress ${FIRMWARE} 2>&1 | tee cowtransfer.log
+        echo "::warning file=cowtransfer.com::$(cat cowtransfer.log | grep https)"
+        echo "url=$(cat cowtransfer.log | grep https | cut -f3 -d" ")" >> $GITHUB_OUTPUT
+
+    - name: Upload firmware to WeTransfer
+      id: wetransfer
+      if: steps.organize.outputs.status == 'success' && env.UPLOAD_WETRANSFER == 'true' && !cancelled()
+      run: |
+        curl -fsSL git.io/file-transfer | sh
+        ./transfer wet -s -p 16 --no-progress ${FIRMWARE} 2>&1 | tee wetransfer.log
+        echo "::warning file=wetransfer.com::$(cat wetransfer.log | grep https)"
+        echo "url=$(cat wetransfer.log | grep https | cut -f3 -d" ")" >> $GITHUB_OUTPUT
+
+    - name: Generate release tag
+      id: tag
+      if: env.UPLOAD_RELEASE == 'true' && !cancelled()
+      run: |
+        echo "release_tag=$(date +"openwrt-23.05.2"-"%Y.%m.%d-%H%M")" >> $GITHUB_OUTPUT
+        touch release.txt
+        [ $UPLOAD_COWTRANSFER = true ] && echo "🔗 [Cowtransfer](${{ steps.cowtransfer.outputs.url }})" >> release.txt
+        [ $UPLOAD_WETRANSFER = true ] && echo "🔗 [WeTransfer](${{ steps.wetransfer.outputs.url }})" >> release.txt
+        echo "status=success" >> $GITHUB_OUTPUT
+
+    - name: Upload firmware to release
+      uses: softprops/action-gh-release@v1
+      if: steps.tag.outputs.status == 'success' && !cancelled()
+      env:
+        GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
+      with:
+        tag_name: ${{ steps.tag.outputs.release_tag }}
+        body_path: release.txt
+        files: ${{ env.FIRMWARE }}/*
+
+    - name: Delete workflow runs
+      uses: Mattraks/delete-workflow-runs@main
+      with:
+        retain_days: 0
+        keep_minimum_runs: 3
+
+    - name: Remove old Releases
+      uses: dev-drprasad/delete-older-releases@v0.2.1
+      if: env.UPLOAD_RELEASE == 'true' && !cancelled()
+      with:
+        repo: ${{ github.repository }}  
+        keep_latest: 6
+        delete_tags: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
