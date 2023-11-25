@@ -38,7 +38,6 @@ env:
   ADD_FULLCONE: true
   FULLCONE_SH: config/x86/openwrt-23.05.2/fullcone.sh
   FULLCONE_PATCH_PATH: config/x86/openwrt-23.05.2/luci-app-firewall-fullcone.patch
-  CLASH_SH: config/x86/openwrt-23.05.2/clash.sh
 
 jobs:
   build:
