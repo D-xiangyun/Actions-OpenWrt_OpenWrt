@@ -66,6 +66,3 @@ curl -sfL -o ./dev.tar.gz "$CORE_DEV"-"$CORE_TYPE".tar.gz
 tar -zxf ./dev.tar.gz
 
 chmod +x ./clash* ; rm -rf ./*.gz
-
-cd /workdir/OpenClash
-cp -r luci-app-openclash /workdir/openwrt/package/
