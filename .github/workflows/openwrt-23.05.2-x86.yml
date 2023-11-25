@@ -171,25 +171,25 @@ jobs:
 #       git pull --depth 1 origin main
 #       git branch --set-upstream-to=origin/main master
     
-#    - name: Add openclash
-#      id: openclash
-#      run: |
-#       cd openwrt
-#       mkdir -p package/openclash
-#       cd package/openclash
-#       git init
-#       git remote add origin https://github.com/vernesong/OpenClash.git
-#       git config core.sparsecheckout true
-#       echo "luci-app-openclash" >> .git/info/sparse-checkout
-#       git pull --depth 1 origin master
-#       git branch --set-upstream-to=origin/master master
+    - name: Add openclash
+      id: openclash
+      run: |
+       cd openwrt
+       mkdir -p package/passwall/openclash
+       cd package/passwall/openclash
+       git init
+       git remote add origin https://github.com/vernesong/OpenClash.git
+       git config core.sparsecheckout true
+       echo "luci-app-openclash" >> .git/info/sparse-checkout
+       git pull --depth 1 origin master
+       git branch --set-upstream-to=origin/master master
 
     - name: Add mosdns
       id: mosdns
       run: |
        cd openwrt
-       mkdir -p package/mosdns
-       cd package/mosdns
+       mkdir -p package/passwall/mosdns
+       cd package/passwall/mosdns
        git init
        git remote add origin https://github.com/sbwml/luci-app-mosdns.git
        git config core.sparsecheckout true
