@@ -207,6 +207,86 @@ jobs:
        $GITHUB_WORKSPACE/$FULLCONE_SH
        cd feeds/luci
        git diff applications/luci-app-firewall/htdocs/luci-static/resources/view/firewall/zones.js
+       
+    - name: 下载openclash内核
+      working-directory: ${{ env.OPENWRT_ROOT_PATH }}
+      run: |
+        if [ "$(grep -c "^CONFIG_PACKAGE_luci-app-openclash=y$" .config)" -ne '0' ];then
+            ARCHT="$(sed -n '/CONFIG_ARCH=/p' .config | sed -e 's/CONFIG_ARCH\=\"//' -e 's/\"//')"
+            case "${ARCHT}" in
+              aarch64)
+              		      CORE_ARCH="linux-arm64"
+              		      ;;
+              arm)
+                if [ "$(grep -c "CONFIG_arm_" .config)" -ne '0' ];then
+                  armv="$(sed -n '/CONFIG_arm_/p' .config | sed -e 's/CONFIG_arm_//' -e 's/=y//')"
+                else
+                  armv=v5
+                fi
+              		CORE_ARCH="linux-arm$armv"
+              		;;
+              	i386)
+              		CORE_ARCH="linux-386"
+              		;;
+              	mips64)
+              		CORE_ARCH="linux-mips64"
+              		;;
+              	mips)
+              		CORE_ARCH="linux-mips-softfloat"
+              		;;
+              	mipsel)
+              		CORE_ARCH="linux-mipsle-softfloat"
+              		;;
+              	x86_64)
+              		CORE_ARCH="linux-amd64"
+              		;;
+              	*)
+              		CORE_ARCH="1"
+              		;;
+              esac
+              echo "::notice ::检测到luci-app-openclash配置为编译进固件,下载架构为$CORE_ARCH的openclash内核"
+              if [ "$CORE_ARCH" != 1 ];then
+                OpenClashTMPDIR=$WORKSPACE_ROOT_PATH/tmp/openclash
+                dev_core_path="$OPENWRT_ROOT_PATH/files/etc/openclash/core/clash"
+                tun_core_path="$OPENWRT_ROOT_PATH/files/etc/openclash/core/clash_tun"
+                meta_core_path="$OPENWRT_ROOT_PATH/files/etc/openclash/core/clash_meta"
+                CPU_MODEL=$CORE_ARCH
+                RELEASE_BRANCH=master
+                mkdir -p $OpenClashTMPDIR $OPENWRT_ROOT_PATH/files/etc/openclash/core/
+                rm -rf $OpenClashTMPDIR/*
+                CORE_LV=$(curl -s -L --retry 6 https://raw.githubusercontent.com/vernesong/OpenClash/core/master/core_version|sed -n 2p)
+                curl -s -L --retry 6 -o $OpenClashTMPDIR/clash_tun.gz https://raw.githubusercontent.com/vernesong/OpenClash/core/"$RELEASE_BRANCH"/premium/clash-"$CPU_MODEL"-"$CORE_LV".gz
+                curl -s -L --retry 6 -o $OpenClashTMPDIR/clash_meta.tar.gz https://raw.githubusercontent.com/vernesong/OpenClash/core/"$RELEASE_BRANCH"/meta/clash-"$CPU_MODEL".tar.gz
+                curl -s -L --retry 6 -o $OpenClashTMPDIR/clash.tar.gz https://raw.githubusercontent.com/vernesong/OpenClash/core/"$RELEASE_BRANCH"/dev/clash-"$CPU_MODEL".tar.gz
+                #tun
+                gzip -d $OpenClashTMPDIR/clash_tun.gz
+                rm -rf $OpenClashTMPDIR/clash_tun.gz
+                rm -rf "$tun_core_path"
+                chmod 4755 $OpenClashTMPDIR/clash_tun
+                mv $OpenClashTMPDIR/clash_tun "$tun_core_path"
+                #mate
+                rm -rf "$meta_core_path"
+                tar zxvf $OpenClashTMPDIR/clash_meta.tar.gz -C $OpenClashTMPDIR
+                mv $OpenClashTMPDIR/clash $OpenClashTMPDIR/clash_meta
+                rm -rf  $OpenClashTMPDIR/clash_meta.tar.gz
+                chmod 4755 $OpenClashTMPDIR/clash_meta
+                mv $OpenClashTMPDIR/clash_meta "$meta_core_path"
+                #dev
+                rm -rf "$dev_core_path"
+                tar zxvf $OpenClashTMPDIR/clash.tar.gz -C $OpenClashTMPDIR
+                rm -rf $OpenClashTMPDIR/clash.tar.gz
+                chmod 4755 $OpenClashTMPDIR/clash
+                mv $OpenClashTMPDIR/clash "$dev_core_path"
+                echo "files"
+                ls -la $(find $OPENWRT_ROOT_PATH/files/ -type d)
+              else
+                echo "::warning ::openclash内核不支持此架构,退出执行下载openclash内核。"
+                rm -rf $OPENWRT_ROOT_PATH/files/etc/openclash
+              fi
+          else
+            echo "::notice ::未检测到luci-app-openclash配置为编译进固件,退出执行下载openclash内核。"
+            rm -rf $OPENWRT_ROOT_PATH/files/etc/openclash
+          fi
  
     - name: Install feeds
       run: cd openwrt && ./scripts/feeds install -a
