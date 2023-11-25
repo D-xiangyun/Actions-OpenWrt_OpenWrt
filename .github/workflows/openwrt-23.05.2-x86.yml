@@ -176,8 +176,8 @@ jobs:
       id: openclash
       run: |
        cd openwrt
-       mkdir -p package/passwall/openclash
-       cd package/passwall/openclash
+       mkdir -p package/openclash
+       cd package/openclash
        git init
        git remote add origin https://github.com/vernesong/OpenClash.git
        git config core.sparsecheckout true
@@ -189,8 +189,8 @@ jobs:
       id: mosdns
       run: |
        cd openwrt
-       mkdir -p package/passwall/mosdns
-       cd package/passwall/mosdns
+       mkdir -p package/mosdns
+       cd package/mosdns
        git init
        git remote add origin https://github.com/sbwml/luci-app-mosdns.git
        git config core.sparsecheckout true
