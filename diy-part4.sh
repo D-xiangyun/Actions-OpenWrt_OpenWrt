@@ -19,3 +19,7 @@ sed -i "s/add_list system.ntp.server='0.openwrt.pool.ntp.org'/add_list system.nt
 sed -i "s/add_list system.ntp.server='1.openwrt.pool.ntp.org'/add_list system.ntp.server='time1.cloud.tencent.com'/" package/base-files/files/bin/config_generate
 sed -i "s/add_list system.ntp.server='2.openwrt.pool.ntp.org'/add_list system.ntp.server='time.ustc.edu.cn'/" package/base-files/files/bin/config_generate
 sed -i "s/add_list system.ntp.server='3.openwrt.pool.ntp.org'/add_list system.ntp.server='cn.pool.ntp.org'/" package/base-files/files/bin/config_generate
+#修改版本为编译日期
+#cp -f feeds/smpackage/.github/diy/banner package/base-files/files/etc/banner
+#sed -i "s/%D %V, %C/openwrt $(date +'%m.%d') by Masaaki/g" package/base-files/files/etc/banner
+sed -i "s/DISTRIB_DESCRIPTION='*.*'/DISTRIB_DESCRIPTION='ImmortalWrt by Masaaki'/g"  package/base-files/files/etc/openwrt_release
