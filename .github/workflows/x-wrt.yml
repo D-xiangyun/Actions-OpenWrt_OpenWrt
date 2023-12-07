@@ -37,7 +37,7 @@ env:
   ADD_FULLCONE: true
   FULLCONE_SH: config/x86/x-wrt/fullcone.sh
   FULLCONE_PATCH_PATH: config/x86/x-wrt/luci-app-firewall-fullcone.patch
-  CLASH_SH: x-wrt/preset-clash-core.sh
+  CLASH_SH: config/x86/x-wrt/preset-clash-core.sh
 
 jobs:
   build:
