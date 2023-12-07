@@ -78,16 +78,16 @@ jobs:
     - name: Update feeds
       run: cd openwrt && ./scripts/feeds update -a
 
-    - name: delete package
-      id: delete
-      run: |
-        cd openwrt
-        sudo rm -rf feeds/luci/applications/luci-app-smartdns
-        sudo rm -rf feeds/packages/net/smartdns
-        git clone -b master https://github.com/pymumu/openwrt-smartdns feeds/packages/net/smartdns
-        git clone -b master https://github.com/pymumu/luci-app-smartdns feeds/luci/applications/luci-app-smartdns
-        # sudo rm -rf package/feeds/luci/luci-app-smartdns
-        # sudo rm -rf package/feeds/packages/smartdns
+#    - name: delete package
+#      id: delete
+#      run: |
+#        cd openwrt
+#        sudo rm -rf feeds/luci/applications/luci-app-smartdns
+#        sudo rm -rf feeds/packages/net/smartdns
+#        git clone -b master https://github.com/pymumu/openwrt-smartdns feeds/packages/net/smartdns
+#        git clone -b master https://github.com/pymumu/luci-app-smartdns feeds/luci/applications/luci-app-smartdns
+#        # sudo rm -rf package/feeds/luci/luci-app-smartdns
+#        # sudo rm -rf package/feeds/packages/smartdns
 #        git clone -b main https://github.com/fw876/helloworld package/passwall
 #        sudo rm -rf package/passwall/mosdns
 #        git clone -b main https://github.com/xiaorouji/openwrt-passwall.git package/passwall/p
