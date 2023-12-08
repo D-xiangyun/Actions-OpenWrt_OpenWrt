@@ -39,8 +39,7 @@ env:
   ADD_FULLCONE: true
   FULLCONE_SH: config/x86/openwrt-23.05.2/fullcone.sh
   FULLCONE_PATCH_PATH: config/x86/openwrt-23.05.2/luci-app-firewall-fullcone.patch
-  CLASH_SH: config/x86/openwrt-23.05.2/preset-clash-core.sh
-
+  
 jobs:
   build:
     runs-on: ubuntu-22.04
@@ -228,8 +227,10 @@ jobs:
         [ -e files ] && mv files openwrt/files
         [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
         chmod +x $DIY_P2_SH
+        chmod +x $GITHUB_WORKSPACE/scripts/*.sh
         cd openwrt
         $GITHUB_WORKSPACE/$DIY_P2_SH
+        $GITHUB_WORKSPACE/scripts/preset-clash-core.sh $CLASH_KERNEL
 
     - name: SSH connection to Actions
       uses: P3TERX/ssh2actions@v1.0.0
