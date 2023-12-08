@@ -204,6 +204,12 @@ jobs:
        cd feeds/luci
        git diff applications/luci-app-firewall/htdocs/luci-static/resources/view/firewall/zones.js
 
+   - name: apply patches
+      run: |
+       cd openwrt 
+       git apply $GITHUB_WORKSPACE/patches/FixTproxyDependencies.patch
+       git apply $GITHUB_WORKSPACE/patches/openclash.patch    
+
     - name: Install feeds
       run: cd openwrt && ./scripts/feeds install -a
 
